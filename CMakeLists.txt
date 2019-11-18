@@ -3,4 +3,4 @@ project(Sies C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(Sies main.c)
+add_executable(Sies main.c piece.c board.c)
