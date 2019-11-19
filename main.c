@@ -1,6 +1,6 @@
-#include "game/board.h"
+#include "chess.h"
 
 int main() {
-    print_board();
+    play();
     return 0;
 }

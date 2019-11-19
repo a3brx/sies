@@ -1,8 +1,12 @@
 #include <stdint.h>
 #include "board.h"
 
-short parse_position(short *notation) {
-    return (notation[0] - 'a') * 8 + (notation[1] - '1');
+short get_col(char * notation) {
+    return notation[0] - 'a';
+}
+
+short get_row(char * notation) {
+    return notation[1] - '1';
 }
 
 struct piece *get_piece(const short *row, const short *col) {
@@ -25,7 +29,7 @@ void initialize_color(enum color color) {
     }
 }
 
-void inicialize_board() {
+void construct_board() {
     initialize_color(WHITE);
     initialize_color(BLACK);
     for (int row = 2; row < 6; ++row) {
@@ -35,8 +39,15 @@ void inicialize_board() {
     }
 }
 
+void destruct_board() {
+    for (int row = 0; row < 8; row++) {
+      for (int col = 0; col < 8; col++) {
+        free(board[row][col]);
+      }
+    }
+}
+
 void print_board() {
-    inicialize_board();
     for (short row = 7; row >= 0; --row) {
         for (short col = 0; col < 8; ++col) {
             print_piece(get_piece(&row, &col));
