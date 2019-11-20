@@ -20,6 +20,5 @@ void play(){
     construct_board();
     print_board();
     get_move();
-
     destruct_board();
 }

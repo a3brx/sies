@@ -1,8 +1,8 @@
 # name of the program (Minix service)
-PROG=chess
+PROG=proj
 
 # source code files to be compiled
-SRCS = main.c piece.c board.c
+SRCS = main.c piece.c board.c chess.c
 
 # additional compilation flags
 CPPFLAGS += -pedantic
