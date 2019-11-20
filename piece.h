@@ -15,6 +15,6 @@ struct piece {
     enum color color;
 };
 
-struct piece *create_piece(enum color color, enum type type);
+struct piece *construct_piece(enum color color, enum type type);
 
-void print_piece(struct piece * piece);
+void print_piece(struct piece *piece);
