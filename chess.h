@@ -1,13 +1,15 @@
 #pragma once
 
 enum status {
-    PLAYING, CHECKMATE, STALEMATE, REPETITION, RESIGN
+    PLAYING, CHECKMATE, STALEMATE, REPETITION, RESIGN, TO_BEGIN
 };
 
 void construct_chess();
 
 void destruct_chess();
 
-enum status make_move();
+void make_move();
 
-char * get_winner();
+enum status get_status();
+
+char *get_final_message();

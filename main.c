@@ -1,21 +1,16 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "chess.h"
+#include "board.h"
 
 int main() {
     construct_chess();
-    while(true){
+    do {
         char * move = "pe2e3";
-        enum status result = make_move(move);
-        if(result == STALEMATE || result == REPETITION){
-            printf("Draw\n");
-            break;
-        }
-        if(result == RESIGN || result == CHECKMATE){
-            printf("%s wins!\n", get_winner());
-            break;
-        }
-    }
+        make_move(move);
+        print_board();
+    } while(get_status());
+    printf("%s", get_final_message());
     destruct_chess();
     return 0;
 }
