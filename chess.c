@@ -145,7 +145,41 @@ enum status get_status() {
     return status;
 }
 
-bool valid_move(const struct position *from, const struct position *to) {
+static bool valid_move(const struct position *from, const struct position *to) {
+    /// If the final and initial positions are the same
+    if (from->row == to->row && from->col == to->col)
+        return false;
+    /// If there's no piece in the position or if the piece is not from the player
+    if (get_piece(from) == NULL || get_piece(from)->color != now_playing)
+        return false;
+    /// There's already a piece of the same color on the final square
+    if ((get_piece(to) != NULL && get_piece(to)->color == now_playing))
+        return false;
+    struct piece *piece = get_piece(from);
+    switch (piece->type) {
+        case KING: {
+            /// The King moves one row and column at maximum
+            if (abs(from->row - to->row) > 1 || abs(from->col - to->col) > 1)
+                return false;
+        }
+            break;
+        case PAWN: {
+            /// The pawn always moves one ahead
+            if (piece->color == WHITE && to->row - from->row != 1)
+                return false;
+            if (piece->color == BLACK && from->row - to->row != 1)
+                return false;
+            /// The pawn con't move more than one column
+            if (abs(from->col - to->col) > 1)
+                return false;
+            /// The pawn move in the diagonal only to capture a piece of the other color
+            if (abs(from->col - to->col) == 1 && (get_piece(to) == NULL || get_piece(to)->color == now_playing))
+                return false;
+        }
+            break;
+        default:
+            break;
+    }
     return true;
 }
 
@@ -159,8 +193,12 @@ int make_move(const char *notation) {
     struct position initial = construct_position(aux);
     substr(aux, notation + 3, 2);
     struct position final = construct_position(aux);
-    if (!valid_move(&initial, &final)) return 1;
+    if (!valid_move(&initial, &final)) {
+        printf("Invalid move!\n");
+        return 1;
+    }
     move_piece(&initial, &final);
+    now_playing = !now_playing;
     return 0;
 }
 
