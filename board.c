@@ -1,6 +1,7 @@
 #include "board.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 static struct piece *board[8][8];
 
@@ -57,6 +58,10 @@ void print_board() {
         }
         printf("\n");
     }
+}
+
+bool valid_move(const struct move * move){
+    return true;
 }
 
 void make_move(const char *from, const char *to) {

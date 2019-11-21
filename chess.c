@@ -31,12 +31,15 @@ bool game_over(){
     return false;
 }
 
-bool valid_move(const struct move * move){
-    return true;
+void construct_chess(){
+    construct_board();
+}
+
+void destruct_chess(){
+    destruct_board();
 }
 
 void play(){
-    construct_board();
     print_board();
     while(!game_over()){
         struct move actual_move;
@@ -49,5 +52,4 @@ void play(){
         }
         print_board();
     }
-    destruct_board();
 }
