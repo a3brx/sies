@@ -53,8 +53,8 @@ static void print_piece(const struct piece *piece) {
 /// ---------------------------------------------------------------------------
 
 struct position {
-    char col;
-    char row;
+    unsigned char col;
+    unsigned char row;
 };
 
 static struct position construct_position(const char *notation) {
@@ -63,6 +63,10 @@ static struct position construct_position(const char *notation) {
     ret.row = (char) (notation[1] - '1');
     return ret;
 }
+
+static bool valid_position(const struct position * position){
+    return position->col >= 0 && position->col < 8 && position->row >= 0 && position->row < 8;
+};
 
 /// ---------------------------------------------------------------------------
 ///                              Board Definition
@@ -145,6 +149,48 @@ enum status get_status() {
     return status;
 }
 
+static bool valid_king_move(const struct position *from, const struct position *to) {
+    /// The King moves one row and column at maximum
+    if (abs(from->row - to->row) > 1 || abs(from->col - to->col) > 1)
+        return false;
+    return true;
+}
+
+static bool valid_rook_move(const struct position *from, const struct position *to) {
+    return true;
+}
+
+static bool valid_bishop_move(const struct position *from, const struct position *to) {
+    return true;
+}
+
+static bool valid_queen_move(const struct position *from, const struct position *to) {
+    /// The Queen moves like a Rook or a Bishop
+    return valid_rook_move(from, to) || valid_bishop_move(from, to);
+}
+
+static bool valid_knight_move(const struct position *from, const struct position *to) {
+    return true;
+}
+
+static bool valid_pawn_move(const struct position *from, const struct position *to) {
+    /// If one of the positions is not in the board
+    if (!valid_position(from) || !valid_position(to))
+        return false;
+    /// The pawn always moves one ahead
+    if (now_playing == WHITE && to->row - from->row != 1)
+        return false;
+    if (now_playing == BLACK && from->row - to->row != 1)
+        return false;
+    /// The pawn con't move more than one column
+    if (abs(from->col - to->col) > 1)
+        return false;
+    /// The pawn move in the diagonal only to capture a piece of the other color
+    if (abs(from->col - to->col) == 1 && (get_piece(to) == NULL || get_piece(to)->color == now_playing))
+        return false;
+    return true;
+}
+
 static bool valid_move(const struct position *from, const struct position *to) {
     /// If the final and initial positions are the same
     if (from->row == to->row && from->col == to->col)
@@ -157,27 +203,29 @@ static bool valid_move(const struct position *from, const struct position *to) {
         return false;
     struct piece *piece = get_piece(from);
     switch (piece->type) {
-        case KING: {
-            /// The King moves one row and column at maximum
-            if (abs(from->row - to->row) > 1 || abs(from->col - to->col) > 1)
+        case KING:
+            if (!valid_king_move(from, to))
                 return false;
-        }
             break;
-        case PAWN: {
-            /// The pawn always moves one ahead
-            if (piece->color == WHITE && to->row - from->row != 1)
+        case QUEEN:
+            if (!valid_queen_move(from, to))
                 return false;
-            if (piece->color == BLACK && from->row - to->row != 1)
-                return false;
-            /// The pawn con't move more than one column
-            if (abs(from->col - to->col) > 1)
-                return false;
-            /// The pawn move in the diagonal only to capture a piece of the other color
-            if (abs(from->col - to->col) == 1 && (get_piece(to) == NULL || get_piece(to)->color == now_playing))
-                return false;
-        }
             break;
-        default:
+        case ROOK:
+            if (!valid_rook_move(from, to))
+                return false;
+            break;
+        case BISHOP:
+            if (!valid_bishop_move(from, to))
+                return false;
+            break;
+        case KNIGHT:
+            if (!valid_knight_move(from, to))
+                return false;
+            break;
+        case PAWN:
+            if (!valid_pawn_move(from, to))
+                return false;
             break;
     }
     return true;
