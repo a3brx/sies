@@ -1,16 +1,18 @@
 #include <stdio.h>
-#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 #include "chess.h"
-#include "board.h"
 
 int main() {
-    construct_chess();
+    construct_game();
+    print_board();
     do {
-        char * move = "pe2e3";
+        char move[7];
+        fgets(move, sizeof(move), stdin);
         make_move(move);
         print_board();
-    } while(get_status());
-    printf("%s", get_final_message());
-    destruct_chess();
+    } while (!get_status());
+    printf("%s\n", get_final_message());
+    destruct_game();
     return 0;
 }

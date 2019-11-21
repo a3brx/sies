@@ -4,11 +4,13 @@ enum status {
     PLAYING, CHECKMATE, STALEMATE, REPETITION, RESIGN, TO_BEGIN
 };
 
-void construct_chess();
+void print_board();
 
-void destruct_chess();
+int make_move(const char *notation);
 
-void make_move();
+void construct_game();
+
+void destruct_game();
 
 enum status get_status();
 
