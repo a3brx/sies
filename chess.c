@@ -7,11 +7,19 @@
 /// ---------------------------------------------------------------------------
 ///                                   Utils
 /// ---------------------------------------------------------------------------
-
-void substr(char *to, const char *from, unsigned char chars) {
+static void substr(char *to, const char *from, unsigned char chars) {
     for (unsigned char index = 0; index < chars; ++index)
         *(to + index) = *(from + index);
     *(to + chars) = '\0';
+}
+
+static bool contains(char **pos, const char *elem) {
+    while (*pos != NULL) {
+        if (strcmp(*pos, elem) == 0)
+            return true;
+        pos++;
+    }
+    return false;
 }
 
 /// ---------------------------------------------------------------------------
@@ -51,11 +59,18 @@ static void print_piece(const struct piece *piece) {
 /// ---------------------------------------------------------------------------
 ///                             Position Definition
 /// ---------------------------------------------------------------------------
-
 struct position {
     unsigned char col;
     unsigned char row;
 };
+
+static char *construct_notation(const struct position *position) {
+    static char result[3];
+    result[0] = (char) (position->col + 'a');
+    result[1] = (char) (position->row + '1');
+    result[2] = '\0';
+    return result;
+}
 
 static struct position construct_position(const char *notation) {
     struct position ret;
@@ -64,7 +79,7 @@ static struct position construct_position(const char *notation) {
     return ret;
 }
 
-static bool valid_position(const struct position * position){
+static bool valid_position(const struct position *position) {
     return position->col >= 0 && position->col < 8 && position->row >= 0 && position->row < 8;
 };
 
@@ -132,7 +147,6 @@ void print_board() {
 /// ---------------------------------------------------------------------------
 ///                               Game Definition
 /// ---------------------------------------------------------------------------
-
 static enum status status = TO_BEGIN;
 static enum color now_playing = WHITE;
 
@@ -149,86 +163,50 @@ enum status get_status() {
     return status;
 }
 
-static bool valid_king_move(const struct position *from, const struct position *to) {
-    /// The King moves one row and column at maximum
-    if (abs(from->row - to->row) > 1 || abs(from->col - to->col) > 1)
-        return false;
-    return true;
+static bool lets_king_in_check(const struct position *from, const struct position *to) {
+    return false;
 }
 
-static bool valid_rook_move(const struct position *from, const struct position *to) {
-    return true;
-}
-
-static bool valid_bishop_move(const struct position *from, const struct position *to) {
-    return true;
-}
-
-static bool valid_queen_move(const struct position *from, const struct position *to) {
-    /// The Queen moves like a Rook or a Bishop
-    return valid_rook_move(from, to) || valid_bishop_move(from, to);
-}
-
-static bool valid_knight_move(const struct position *from, const struct position *to) {
-    return true;
-}
-
-static bool valid_pawn_move(const struct position *from, const struct position *to) {
-    /// If one of the positions is not in the board
-    if (!valid_position(from) || !valid_position(to))
-        return false;
-    /// The pawn always moves one ahead
-    if (now_playing == WHITE && to->row - from->row != 1)
-        return false;
-    if (now_playing == BLACK && from->row - to->row != 1)
-        return false;
-    /// The pawn con't move more than one column
-    if (abs(from->col - to->col) > 1)
-        return false;
-    /// The pawn move in the diagonal only to capture a piece of the other color
-    if (abs(from->col - to->col) == 1 && (get_piece(to) == NULL || get_piece(to)->color == now_playing))
-        return false;
-    return true;
-}
-
-static bool valid_move(const struct position *from, const struct position *to) {
-    /// If the final and initial positions are the same
-    if (from->row == to->row && from->col == to->col)
-        return false;
-    /// If there's no piece in the position or if the piece is not from the player
-    if (get_piece(from) == NULL || get_piece(from)->color != now_playing)
-        return false;
-    /// There's already a piece of the same color on the final square
-    if ((get_piece(to) != NULL && get_piece(to)->color == now_playing))
-        return false;
-    struct piece *piece = get_piece(from);
-    switch (piece->type) {
+static char **get_possible_moves(const struct position *from) {
+    static char *result[28];
+    char actual = 0;
+    memset(result, 0, 28);
+    if (!valid_position(from) || get_piece(from) == NULL || get_piece(from)->color != now_playing)
+        return result;
+    switch (get_piece(from)->type) {
         case KING:
-            if (!valid_king_move(from, to))
-                return false;
             break;
         case QUEEN:
-            if (!valid_queen_move(from, to))
-                return false;
             break;
         case ROOK:
-            if (!valid_rook_move(from, to))
-                return false;
             break;
         case BISHOP:
-            if (!valid_bishop_move(from, to))
-                return false;
             break;
         case KNIGHT:
-            if (!valid_knight_move(from, to))
-                return false;
             break;
-        case PAWN:
-            if (!valid_pawn_move(from, to))
-                return false;
-            break;
+        case PAWN: {
+            struct position position;
+            struct position to_verify[4];
+            char index = 0;
+            for (char i = -1; i < 2; i++) {
+                position.col = from->col + i;
+                position.row = from->row + ((now_playing == WHITE) ? 1 : -1);
+                if (valid_position(&position))
+                    to_verify[index++] = position;
+            }
+            for (char i = 0; i < index; i++) {
+                if (to_verify[i].col == from->col && get_piece(&to_verify[i]) != NULL)
+                    continue;
+                if (to_verify[i].col != from->col &&
+                    (get_piece(&to_verify[i]) == NULL || get_piece(&to_verify[i])->color == now_playing))
+                    continue;
+                if (lets_king_in_check(from, &position))
+                    continue;
+                result[actual++] = construct_notation(&to_verify[i]);
+            }
+            return result;
+        }
     }
-    return true;
 }
 
 int make_move(const char *notation) {
@@ -240,11 +218,11 @@ int make_move(const char *notation) {
     substr(aux, notation + 1, 2);
     struct position initial = construct_position(aux);
     substr(aux, notation + 3, 2);
-    struct position final = construct_position(aux);
-    if (!valid_move(&initial, &final)) {
+    if (!contains(get_possible_moves(&initial), aux)) {
         printf("Invalid move!\n");
         return 1;
     }
+    struct position final = construct_position(aux);
     move_piece(&initial, &final);
     now_playing = !now_playing;
     return 0;
