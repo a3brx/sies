@@ -133,16 +133,21 @@ struct piece *get_piece(const struct position *position) {
 }
 
 void print_board() {
+    printf("    A   B   C   D   E   F   G   H\n");
+    printf("  +---+---+---+---+---+---+---+---+\n");
     for (char row = 7; row >= 0; --row) {
+        printf("%d |", (int) row + 1);
         for (char col = 0; col < 8; ++col) {
             struct position pos;
             pos.col = col;
             pos.row = row;
-            print_piece(get_piece(&pos));
             printf(" ");
+            print_piece(get_piece(&pos));
+            printf(" |");
         }
-        printf("\n");
+        printf(" %d\n  +---+---+---+---+---+---+---+---+\n", (int) row + 1);
     }
+    printf("    A   B   C   D   E   F   G   H\n");
 }
 
 /// ---------------------------------------------------------------------------
@@ -199,9 +204,58 @@ static char **get_possible_moves(const struct position *from) {
             return result;
         }
         case QUEEN: {
+            struct position to_verify[27];
+            for (signed char k = -1; k <= 1; k += 2)
+                for (signed char j = 0; j < 2; j++)
+                    for (signed char i = 1; i < 8; i++) {
+                        position.row = from->row + (k * i) * (j);
+                        position.col = from->col + (k * i) * ((j + 1) % 2);
+                        if (!valid_position(&position))
+                            break;
+                        to_verify[index++] = position;
+                        if (get_piece(&position) != NULL)
+                            break;
+                    }
+            for (signed char j = -1; j <= 1; j += 2)
+                for (signed char k = -1; k <= 1; k += 2)
+                    for (signed char i = 1; i < 8; i++) {
+                        position.row = from->row + j * i;
+                        position.col = from->col + k * j * i;
+                        if (!valid_position(&position))
+                            break;
+                        to_verify[index++] = position;
+                        if (get_piece(&position) != NULL)
+                            break;
+                    }
+            for (char i = 0; i < index; i++) {
+                if (get_piece(&to_verify[i]) != NULL && get_piece(&to_verify[i])->color == now_playing)
+                    continue;
+                if (lets_king_in_check(from, &position))
+                    continue;
+                result[actual++] = construct_notation(&to_verify[i]);
+            }
             return result;
         }
         case ROOK: {
+            struct position to_verify[14];
+            for (signed char k = -1; k <= 1; k += 2)
+                for (signed char j = 0; j < 2; j++)
+                    for (signed char i = 1; i < 8; i++) {
+                        position.row = from->row + (k * i) * (j);
+                        position.col = from->col + (k * i) * ((j + 1) % 2);
+                        if (!valid_position(&position))
+                            break;
+                        to_verify[index++] = position;
+                        if (get_piece(&position) != NULL)
+                            break;
+                    }
+            for (char i = 0; i < index; i++) {
+                if (get_piece(&to_verify[i]) != NULL && get_piece(&to_verify[i])->color == now_playing)
+                    continue;
+                if (lets_king_in_check(from, &position))
+                    continue;
+                result[actual++] = construct_notation(&to_verify[i]);
+            }
             return result;
         }
         case BISHOP: {
