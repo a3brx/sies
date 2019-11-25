@@ -177,23 +177,44 @@ static char **get_possible_moves(const struct position *from) {
     if (!valid_position(from) || get_piece(from) == NULL || get_piece(from)->color != now_playing)
         return result;
     switch (get_piece(from)->type) {
-        case KING:
-            break;
-        case QUEEN:
-            break;
-        case ROOK:
-            break;
+        case KING: {
+            struct position to_verify[8];
+            for (signed char i = -1; i <= 1; i++)
+                for (signed char j = -1; j <= 1; j++) {
+                    if (i == 0 && j == 0)
+                        continue;
+                    position.row = from->row + i;
+                    position.col = from->col + j;
+                    if (!valid_position(&position))
+                        continue;
+                    to_verify[index++] = position;
+                }
+            for (char i = 0; i < index; i++) {
+                if (get_piece(&to_verify[i]) != NULL && get_piece(&to_verify[i])->color == now_playing)
+                    continue;
+                if (lets_king_in_check(from, &position))
+                    continue;
+                result[actual++] = construct_notation(&to_verify[i]);
+            }
+            return result;
+        }
+        case QUEEN: {
+            return result;
+        }
+        case ROOK: {
+            return result;
+        }
         case BISHOP: {
             struct position to_verify[13];
-            for(signed char j = -1; j <= 1; j += 2)
-                for(signed char k = -1; k <= 1; k += 2)
-                    for(signed char i = 1; i < 8; i++){
+            for (signed char j = -1; j <= 1; j += 2)
+                for (signed char k = -1; k <= 1; k += 2)
+                    for (signed char i = 1; i < 8; i++) {
                         position.row = from->row + j * i;
                         position.col = from->col + k * j * i;
                         if (!valid_position(&position))
                             break;
                         to_verify[index++] = position;
-                        if(get_piece(&position) != NULL)
+                        if (get_piece(&position) != NULL)
                             break;
                     }
             for (char i = 0; i < index; i++) {
