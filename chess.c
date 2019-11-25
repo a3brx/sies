@@ -253,31 +253,32 @@ static bool threat_on_position(const struct position *pos, const enum color colo
 }
 
 static bool check_check(enum color color) {
-//    struct position king_pos, aux;
-//    struct position * pos = board;
-//    char step = 1;
-//    if (!color) {
-//        step = -1;
-//        pos += 63;
-//    }
-//    for (int i = 0; i < 64; pos--, i++) {
-//        pos += step;
-//        aux.col = pos->col;
-//        aux.row = pos->row;
-//        if (get_piece(&aux) != NULL && get_piece(&aux)->type == KING) {
-//            king_pos.col = pos->col;
-//            king_pos.row = pos->row;
-//        }
-//    }
-//    char **poss_moves;
-//    for (int i = 0; i < 8; i++) {
-//        for (int j = 0; j < 8; j++) {
-//            aux.row = i;
-//            aux.col = j;
-//            poss_moves = get_possible_moves(&aux);
-//            if (contains(poss_moves, ))
-//        }
-//    }
+    struct position king_pos, aux;
+    struct position * pos = board;
+    char step = 1;
+    if (!color) {
+        step = -1;
+        pos += 63;
+    }
+    for (int i = 0; i < 64; pos--, i++) {
+        pos += step;
+        aux.col = pos->col;
+        aux.row = pos->row;
+        if (get_piece(&aux) != NULL && get_piece(&aux)->type == KING) {
+            king_pos.col = pos->col;
+            king_pos.row = pos->row;
+        }
+    }
+    char **poss_moves;
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            aux.row = i;
+            aux.col = j;
+            poss_moves = get_possible_moves(&aux);
+            if (contains(poss_moves, &king_pos))
+                return true;
+        }
+    }
     return false;
 }
 
