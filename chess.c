@@ -168,10 +168,6 @@ static bool lets_king_in_check(const struct position *from, const struct positio
     return false;
 }
 
-static bool available__path(const struct position *from, const struct position *to) {
-    return true;
-}
-
 static char **get_possible_moves(const struct position *from) {
     static char *result[28];
     memset(result, 0, 28);
@@ -187,8 +183,28 @@ static char **get_possible_moves(const struct position *from) {
             break;
         case ROOK:
             break;
-        case BISHOP:
-            break;
+        case BISHOP: {
+            struct position to_verify[13];
+            for(signed char j = -1; j <= 1; j += 2)
+                for(signed char k = -1; k <= 1; k += 2)
+                    for(signed char i = 1; i < 8; i++){
+                        position.row = from->row + j * i;
+                        position.col = from->col + k * j * i;
+                        if (!valid_position(&position))
+                            break;
+                        to_verify[index++] = position;
+                        if(get_piece(&position) != NULL)
+                            break;
+                    }
+            for (char i = 0; i < index; i++) {
+                if (get_piece(&to_verify[i]) != NULL && get_piece(&to_verify[i])->color == now_playing)
+                    continue;
+                if (lets_king_in_check(from, &position))
+                    continue;
+                result[actual++] = construct_notation(&to_verify[i]);
+            }
+            return result;
+        }
         case KNIGHT: {
             struct position to_verify[8];
             for (signed char i = -2; i <= 2; i++) {
@@ -288,9 +304,9 @@ int make_move(const char *notation) {
         return 0;
     }
     char aux[3];
-    substr(aux, notation + 1, 2);
+    substr(aux, notation, 2);
     struct position initial = construct_position(aux);
-    substr(aux, notation + 3, 2);
+    substr(aux, notation + 2, 2);
     if (!contains(get_possible_moves(&initial), aux)) {
         printf("Invalid move!\n");
         return 1;
