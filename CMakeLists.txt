@@ -3,4 +3,4 @@ project(sies C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(sies main.c chess.c)
+add_executable(sies main.c chess/utils.c chess/chess.c)

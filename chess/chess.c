@@ -3,39 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
-/// ---------------------------------------------------------------------------
-///                                   Utils
-/// ---------------------------------------------------------------------------
-static void substr(char *to, const char *from, unsigned char chars) {
-    for (unsigned char index = 0; index < chars; ++index)
-        *(to + index) = *(from + index);
-    *(to + chars) = '\0';
-}
-
-static bool contains(char **pos, const char *elem) {
-    while (*pos != NULL) {
-        printf("%s ", *pos);
-        if (strcmp(*pos, elem) == 0)
-            return true;
-        pos++;
-    }
-    printf("\n");
-    return false;
-}
-
-#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
-#define PLATFORM_NAME "windows"
-#elif defined(__linux__)
-#define PLATFORM_NAME "linux"
-#endif
-
-void clear() {
-    if (PLATFORM_NAME == "linux")
-        printf("\033[2J\033[1;1H");
-    else if (PLATFORM_NAME == "windows")
-        system("cls");
-}
+#include "utils.h"
 
 /// ---------------------------------------------------------------------------
 ///                              Piece Definition
@@ -328,7 +296,7 @@ static char **get_possible_moves(const struct position *from) {
                 if (get_piece(&position) != NULL)
                     break;
             }
-            for (char i = 1; i <= 2; i ++) {
+            for (char i = 1; i <= 2; i++) {
                 position.col = from->col;
                 position.row = from->row + ((now_playing == WHITE) ? i : -i);
                 if (valid_position(&position))
@@ -350,6 +318,7 @@ static char **get_possible_moves(const struct position *from) {
 }
 
 static bool threat_on_position(const struct position *pos, const enum color color) {
+    /*
     struct position aux;
     char **poss_moves;
     for (int i = 0; i < 8; i++) {
@@ -365,6 +334,7 @@ static bool threat_on_position(const struct position *pos, const enum color colo
             }
         }
     }
+     */
     return false;
 }
 
