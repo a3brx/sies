@@ -29,6 +29,7 @@ static bool contains(char **pos, const char *elem) {
 #elif defined(__linux__)
 #define PLATFORM_NAME "linux"
 #endif
+
 void clear() {
     if (PLATFORM_NAME == "linux")
         printf("\033[2J\033[1;1H");
@@ -66,7 +67,7 @@ static void destruct_piece(struct piece *piecePtr) {
 static void print_piece(const struct piece *piece) {
     if (piece == NULL)
         printf(" ");
-    else if(piece->color)
+    else if (piece->color)
         printf("%c", piece->type);
     else
         printf("\e[1;90m%c\e[0m", piece->type);
@@ -115,10 +116,10 @@ static void initialize_color(enum color color) {
     board[row][5] = construct_piece(color, BISHOP);
     board[row][6] = construct_piece(color, KNIGHT);
     board[row][7] = construct_piece(color, ROOK);
-    row = (short) (row % 2 * 5 + 1);
+    /*row = (short) (row % 2 * 5 + 1);
     for (short col = 0; col < 8; ++col) {
         board[row][col] = construct_piece(color, PAWN);
-    }
+    }*/
 }
 
 static void construct_board() {
@@ -191,7 +192,7 @@ static bool lets_king_in_check(const struct position *from, const struct positio
 
 static char **get_possible_moves(const struct position *from) {
     static char *result[28];
-    memset(result, 0, 28);
+    memset(result, 0, 28 * sizeof(char *));
     struct position position;
     char index = 0;
     char actual = 0;
@@ -319,9 +320,17 @@ static char **get_possible_moves(const struct position *from) {
         }
         case PAWN: {
             struct position to_verify[4];
-            for (char i = -1; i < 2; i++) {
+            for (char i = -1; i <= 1; i += 2) {
                 position.col = from->col + i;
                 position.row = from->row + ((now_playing == WHITE) ? 1 : -1);
+                if (valid_position(&position))
+                    to_verify[index++] = position;
+                if (get_piece(&position) != NULL)
+                    break;
+            }
+            for (char i = 1; i <= 2; i ++) {
+                position.col = from->col;
+                position.row = from->row + ((now_playing == WHITE) ? i : -i);
                 if (valid_position(&position))
                     to_verify[index++] = position;
             }
