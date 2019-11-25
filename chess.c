@@ -82,7 +82,7 @@ static struct position construct_position(const char *notation) {
 
 static bool valid_position(const struct position *position) {
     return position->col >= 0 && position->col < 8 && position->row >= 0 && position->row < 8;
-};
+}
 
 /// ---------------------------------------------------------------------------
 ///                              Board Definition
@@ -244,7 +244,7 @@ static bool threat_on_position(const struct position *pos, const enum color colo
                 continue;
             else if (get_piece(&aux)->color != color) {
                 poss_moves = get_possible_moves(&aux);
-                if (contains(poss_moves, pos))
+                if (contains(poss_moves, construct_notation(pos)))
                     return true;
             }
         }
@@ -253,8 +253,8 @@ static bool threat_on_position(const struct position *pos, const enum color colo
 }
 
 static bool check_check(enum color color) {
-    struct position king_pos, aux;
-    struct position * pos = board;
+    /*struct position king_pos, aux;
+    struct position * pos = board[0][0];
     char step = 1;
     if (!color) {
         step = -1;
@@ -279,7 +279,7 @@ static bool check_check(enum color color) {
                 return true;
         }
     }
-    return false;
+    return false;*/
 }
 
 int make_move(const char *notation) {
