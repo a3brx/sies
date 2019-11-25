@@ -65,7 +65,8 @@ struct position {
 };
 
 static char *construct_notation(const struct position *position) {
-    static char result[3];
+    char *result;
+    result = (char *) malloc(3 * sizeof(char));
     result[0] = (char) (position->col + 'a');
     result[1] = (char) (position->row + '1');
     result[2] = '\0';
@@ -167,10 +168,16 @@ static bool lets_king_in_check(const struct position *from, const struct positio
     return false;
 }
 
+static bool available__path(const struct position *from, const struct position *to) {
+    return true;
+}
+
 static char **get_possible_moves(const struct position *from) {
     static char *result[28];
-    char actual = 0;
     memset(result, 0, 28);
+    struct position position;
+    char index = 0;
+    char actual = 0;
     if (!valid_position(from) || get_piece(from) == NULL || get_piece(from)->color != now_playing)
         return result;
     switch (get_piece(from)->type) {
@@ -182,12 +189,29 @@ static char **get_possible_moves(const struct position *from) {
             break;
         case BISHOP:
             break;
-        case KNIGHT:
-            break;
+        case KNIGHT: {
+            struct position to_verify[8];
+            for (signed char i = -2; i <= 2; i++) {
+                if (i == 0)
+                    continue;
+                for (signed char j = -1; j <= 1; j += 2) {
+                    position.row = from->row + i;
+                    position.col = from->col + j * (3 - abs(i));
+                    if (valid_position(&position))
+                        to_verify[index++] = position;
+                }
+            }
+            for (char i = 0; i < index; i++) {
+                if (get_piece(&to_verify[i]) != NULL && get_piece(&to_verify[i])->color == now_playing)
+                    continue;
+                if (lets_king_in_check(from, &position))
+                    continue;
+                result[actual++] = construct_notation(&to_verify[i]);
+            }
+            return result;
+        }
         case PAWN: {
-            struct position position;
             struct position to_verify[4];
-            char index = 0;
             for (char i = -1; i < 2; i++) {
                 position.col = from->col + i;
                 position.row = from->row + ((now_playing == WHITE) ? 1 : -1);
