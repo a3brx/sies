@@ -209,6 +209,54 @@ static char **get_possible_moves(const struct position *from) {
     }
 }
 
+static bool threat_on_position(const struct position *pos, const enum color color) {
+    struct position aux;
+    char **poss_moves;
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            aux.row = i;
+            aux.col = j;
+            if (get_piece(&aux) == NULL)
+                continue;
+            else if (get_piece(&aux)->color != color) {
+                poss_moves = get_possible_moves(&aux);
+                if (contains(poss_moves, pos))
+                    return true;
+            }
+        }
+    }
+    return false;
+}
+
+static bool check_check(enum color color) {
+//    struct position king_pos, aux;
+//    struct position * pos = board;
+//    char step = 1;
+//    if (!color) {
+//        step = -1;
+//        pos += 63;
+//    }
+//    for (int i = 0; i < 64; pos--, i++) {
+//        pos += step;
+//        aux.col = pos->col;
+//        aux.row = pos->row;
+//        if (get_piece(&aux) != NULL && get_piece(&aux)->type == KING) {
+//            king_pos.col = pos->col;
+//            king_pos.row = pos->row;
+//        }
+//    }
+//    char **poss_moves;
+//    for (int i = 0; i < 8; i++) {
+//        for (int j = 0; j < 8; j++) {
+//            aux.row = i;
+//            aux.col = j;
+//            poss_moves = get_possible_moves(&aux);
+//            if (contains(poss_moves, ))
+//        }
+//    }
+    return false;
+}
+
 int make_move(const char *notation) {
     if (strcmp(notation, "res\n") == 0) {
         status = RESIGN;
