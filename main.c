@@ -10,6 +10,7 @@ int main() {
         char move[7];
         fgets(move, sizeof(move), stdin);
         make_move(move);
+        //clear();
         print_board();
     } while (!get_status());
     printf("%s\n", get_final_message());

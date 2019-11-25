@@ -4,6 +4,8 @@ enum status {
     PLAYING, CHECKMATE, STALEMATE, REPETITION, RESIGN, TO_BEGIN
 };
 
+void clear();
+
 void print_board();
 
 int make_move(const char *notation);

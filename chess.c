@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#import <stdbool.h>
+#include <stdbool.h>
 
 /// ---------------------------------------------------------------------------
 ///                                   Utils
@@ -15,11 +15,25 @@ static void substr(char *to, const char *from, unsigned char chars) {
 
 static bool contains(char **pos, const char *elem) {
     while (*pos != NULL) {
+        printf("%s ", *pos);
         if (strcmp(*pos, elem) == 0)
             return true;
         pos++;
     }
+    printf("\n");
     return false;
+}
+
+#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
+#define PLATFORM_NAME "windows"
+#elif defined(__linux__)
+#define PLATFORM_NAME "linux"
+#endif
+void clear() {
+    if (PLATFORM_NAME == "linux")
+        printf("\033[2J\033[1;1H");
+    else if (PLATFORM_NAME == "windows")
+        system("cls");
 }
 
 /// ---------------------------------------------------------------------------
@@ -52,8 +66,10 @@ static void destruct_piece(struct piece *piecePtr) {
 static void print_piece(const struct piece *piece) {
     if (piece == NULL)
         printf(" ");
-    else
+    else if(piece->color)
         printf("%c", piece->type);
+    else
+        printf("\e[1;90m%c\e[0m", piece->type);
 }
 
 /// ---------------------------------------------------------------------------
