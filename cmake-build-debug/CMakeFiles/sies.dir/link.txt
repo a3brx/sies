@@ -1,0 +1,1 @@
+/usr/bin/cc -g   CMakeFiles/sies.dir/main.c.o CMakeFiles/sies.dir/chess/utils.c.o CMakeFiles/sies.dir/chess/chess.c.o  -o sies 

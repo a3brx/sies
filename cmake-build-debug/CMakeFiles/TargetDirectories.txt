@@ -1,0 +1,3 @@
+/home/abrx/sies/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/abrx/sies/cmake-build-debug/CMakeFiles/sies.dir
+/home/abrx/sies/cmake-build-debug/CMakeFiles/edit_cache.dir
